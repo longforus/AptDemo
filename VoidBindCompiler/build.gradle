@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':VoidBindAnno')
+    //不能依赖android library
+    implementation project(':VoidBindApi')
+    implementation 'com.google.auto.service:auto-service:1.0-rc4'
+    implementation 'com.squareup:javapoet:1.11.0'
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
