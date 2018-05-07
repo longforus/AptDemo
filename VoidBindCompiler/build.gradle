@@ -9,5 +9,10 @@ dependencies {
     implementation 'com.squareup:javapoet:1.11.0'
 }
 
+//指定编译的编码
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
+}
+
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"

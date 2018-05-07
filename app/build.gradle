@@ -31,7 +31,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     //注解
-    implementation project(':VoidBindAnno')
+    compileOnly project(':VoidBindAnno')
     //工具
     implementation project(':VoidBindApi')
     //处理注解生成代码

@@ -8,7 +8,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,12 +35,14 @@ import javax.lang.model.element.VariableElement;
 public class VoidBindCompiler extends AbstractProcessor {
 
     private ProcessingEnvironment mProcessingEnv;
+    private SimpleDateFormat mDateFormat;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         //后续要用到
         mProcessingEnv = processingEnv;
+        mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
 
     @Override
@@ -82,7 +86,7 @@ public class VoidBindCompiler extends AbstractProcessor {
                                         .addMethod(methodBuild.build()).build();
 
             String packageName = fullName.substring(0,i);
-            JavaFile javaFile = JavaFile.builder(packageName,typeSpec).build();
+            JavaFile javaFile = JavaFile.builder(packageName,typeSpec).addFileComment("This class generate by VoidBind.Don't modify it,   - "+mDateFormat.format(new Date())).build();
             try {
                 //写出到generated/source/kapt/debug/包名/目录下
                 javaFile.writeTo(mProcessingEnv.getFiler());
