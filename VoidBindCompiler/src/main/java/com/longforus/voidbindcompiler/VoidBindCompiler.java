@@ -3,8 +3,10 @@ package com.longforus.voidbindcompiler;
 import com.google.auto.service.AutoService;
 import com.longforus.voidbindanno.BindView;
 import com.longforus.voidbindapi.IBind;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
@@ -66,23 +68,22 @@ public class VoidBindCompiler extends AbstractProcessor {
 
             String fullName = entry.getKey();
             int i = fullName.lastIndexOf(".");
+            //获取外围元素的类型,toString()其实就是全类名
+            TypeName enclosingTypeName = TypeName.get(entry.getValue().get(0).getEnclosingElement().asType());
             //生成方法
             MethodSpec.Builder methodBuild = MethodSpec.methodBuilder("bind").addAnnotation(Override.class).addModifiers(Modifier.PUBLIC).returns(void.class).addParameter(
-                Object.class,"target");
-            //获取外围元素的类型,其实就是全类名
-            String targetType = TypeName.get(entry.getValue().get(0).getEnclosingElement().asType()).toString();
-            //添加强转
-            methodBuild.addStatement(targetType + " realTarget = (" + targetType + ")target");
+                enclosingTypeName,"target");
             for (VariableElement element : entry.getValue()) {
                 methodBuild.addStatement(
-                    String.format(Locale.CHINA,"realTarget.%s=realTarget.findViewById(%d)",element.getSimpleName().toString(),element.getAnnotation(BindView.class).value()));
+                    String.format(Locale.CHINA,"target.%s=target.findViewById(%d)",element.getSimpleName().toString(),element.getAnnotation(BindView.class).value()));
             }
 
             String enclosingClassName = fullName.substring(i + 1,fullName.length());
+            //生成带泛型的接口类型名
+            ParameterizedTypeName superinterface = ParameterizedTypeName.get(ClassName.get(IBind.class),enclosingTypeName);
             TypeSpec typeSpec = TypeSpec.classBuilder(enclosingClassName + "$VoidBind")
                                         .addModifiers(Modifier.PUBLIC,Modifier.FINAL)
-                                        //还没有弄清楚这里怎么添加泛型,所以只能用上面的强转.
-                                        .addSuperinterface(IBind.class)
+                                        .addSuperinterface(superinterface)
                                         .addMethod(methodBuild.build()).build();
 
             String packageName = fullName.substring(0,i);
